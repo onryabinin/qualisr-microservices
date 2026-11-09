@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QualiSR Microservices</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/plotly.min.js" defer></script>
+  <script src="/static/app.js" type="module"></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>QualiSR Microservices</h1>
+    <p>Оценка качества суперразрешения по MOS и предвычисленным признакам</p>
+  </header>
+
+  <section aria-labelledby="setup-title">
+    <h2 id="setup-title">Новый эксперимент</h2>
+    <details>
+      <summary>Импортировать датасет</summary>
+      <form id="import-form">
+        <p>Имя файла признаков задаёт группу. Например, <code>nr.csv</code> задаёт <code>nr</code>.</p>
+        <div class="fields">
+          <label>Имя датасета <input name="name" required maxlength="100"></label>
+          <label>CSV с оценками <input name="labels" type="file" accept=".csv" required></label>
+          <label>CSV с признаками <input name="features" type="file" accept=".csv" multiple required></label>
+        </div>
+        <button>Импортировать</button>
+        <p id="import-status" role="status"></p>
+      </form>
+    </details>
+    <form id="experiment-form">
+      <div class="fields">
+        <label>Датасет <select id="dataset" required></select></label>
+      </div>
+      <p id="dataset-info"></p>
+      <fieldset>
+        <legend>Группы признаков</legend>
+        <div class="choices" id="features"></div>
+        <details>
+          <summary>Колонки и файлы датасета</summary>
+          <dl id="feature-columns"></dl>
+        </details>
+        <fieldset id="references" hidden>
+          <legend>Референсы FR</legend>
+          <div class="choices">
+            <label><input type="checkbox" value="rlfn"> RLFN</label>
+            <label><input type="checkbox" value="gt"> GT</label>
+            <label><input type="checkbox" value="bicubic"> Bicubic</label>
+            <label><input type="checkbox" value="span"> SPAN</label>
+          </div>
+        </fieldset>
+      </fieldset>
+      <fieldset>
+        <legend>Регрессоры и гиперпараметры</legend>
+        <div class="fields" id="models"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Протокол оценки</legend>
+        <div class="fields">
+          <label>Режим
+            <select id="mode">
+              <option value="split">Групповой train/test split</option>
+              <option value="cv">Групповая кросс-валидация</option>
+            </select>
+          </label>
+          <label>Seed модели <input id="seed" type="number" min="0" max="4294967295" value="42" required></label>
+          <label>Seed разбиения <input id="split-seed" type="number" min="0" max="4294967295" value="42" required></label>
+          <label id="split-setting">Доля тестовых групп
+            <input type="text" value="20%" readonly aria-describedby="split-note">
+          </label>
+          <label id="cv-setting" hidden>Число фолдов <input id="n-splits" type="number" min="2" value="5" required disabled></label>
+        </div>
+        <p id="split-note">Standalone CLI QualiSR-Lab 0.2.0 использует фиксированную долю 0.2.</p>
+      </fieldset>
+      <button id="run-button" disabled>Запустить эксперимент</button>
+      <p id="submit-status" role="status"></p>
+    </form>
+  </section>
+
+  <section aria-labelledby="run-title" id="run-details" hidden>
+    <h2 id="run-title">Эксперимент</h2>
+    <p id="run-meta"></p>
+    <p id="run-status" role="status"></p>
+    <button id="start-created" type="button" hidden>Поставить в очередь</button>
+    <details id="log-panel">
+      <summary>Журнал процесса</summary>
+      <button id="refresh-log" type="button">Обновить журнал</button>
+      <pre id="log"></pre>
+    </details>
+    <div id="results" hidden>
+      <h3>Корреляции PLCC и SRCC</h3>
+      <p id="evaluation"></p>
+      <div id="correlations" class="table-wrap"></div>
+      <details id="fold-panel" hidden>
+        <summary>Корреляции по фолдам</summary>
+        <div id="folds" class="table-wrap"></div>
+      </details>
+      <h3>MOS и предсказания</h3>
+      <label>Регрессор <select id="prediction-model"></select></label>
+      <p id="scatter-status" role="status"></p>
+      <div id="scatter"></div>
+      <h3>Важность признаков</h3>
+      <div id="importance"></div>
+    </div>
+    <div id="downloads" hidden>
+      <h3>Артефакты</h3>
+      <ul id="exports"></ul>
+      <details>
+        <summary>Все файлы запуска</summary>
+        <ul id="artifacts"></ul>
+      </details>
+    </div>
+  </section>
+
+  <section aria-labelledby="history-title">
+    <h2 id="history-title">История экспериментов</h2>
+    <div class="actions">
+      <button id="refresh-history" type="button">Обновить историю</button>
+      <button id="compare" type="button" disabled>Сравнить выбранные</button>
+    </div>
+    <p id="history-status" role="status"></p>
+    <div id="history" class="table-wrap"></div>
+    <div id="comparison" hidden>
+      <h3>Сравнение запусков</h3>
+      <p id="comparison-status" role="status"></p>
+      <div id="comparison-table" class="table-wrap"></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{
+  "experiment_name": "qualisr-baseline",
+  "seed": 42,
+  "split_seed": 42,
+  "paths": {
+    "labels": "labels.csv",
+    "features_root": "features",
+    "plots_root": "outputs"
+  },
+  "scale_features": true,
+  "imputation": { "enabled": true, "strategy": "median" },
+  "cross_validation": { "enabled": false, "n_splits": 5 },
+  "features": {
+    "pca_n": 5,
+    "include": ["nr", "fr"],
+    "include_stats": false,
+    "exclude_columns": ["qalign"],
+    "fr_refs": ["rlfn"],
+    "feature_files": {
+      "nr": "{features_root}/nr.csv",
+      "fr": "{features_root}/fr.csv"
+    }
+  },
+  "models": {
+    "randomforest": { "enabled": true, "params": { "n_estimators": 16 } }
+  },
+  "correlation_metrics": {
+    "enabled": true,
+    "items": [
+      { "label": "MUSIQ (NR)", "feature": "nr", "metric": "musiq", "higher_is_better": true },
+      {
+        "label": "LPIPS-VGG+GT (FR)",
+        "feature": "fr",
+        "metric": "lpips-vgg",
+        "reference": "gt",
+        "higher_is_better": false
+      }
+    ]
+  },
+  "save_dataset_snapshot": true,
+  "save_mean_correlations": false,
+  "save_best_correlations": false,
+  "permutation_repeats": 2,
+  "plot": {
+    "enabled": {
+      "importance": true,
+      "all_importances": false,
+      "shap": false,
+      "all_shap_importances": false,
+      "correlations": true,
+      "correlations_without_metrics": false,
+      "feature_correlations": false,
+      "feature_cross_correlation_matrix": false,
+      "prediction_scatter": true
+    },
+    "importance_figsize": [6, 5],
+    "correlation_figsize": [9, 4],
+    "dpi": 100
+  }
+}

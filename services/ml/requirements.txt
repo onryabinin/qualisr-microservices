@@ -1,0 +1,1 @@
+qualisr-lab[regressors]==0.2.0

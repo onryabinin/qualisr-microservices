@@ -1,0 +1,20 @@
+{
+  "workspace": "/workspace",
+  "http_timeout": 30,
+  "storage": {
+    "url": "http://storage:8000"
+  },
+  "collector": {
+    "url": "http://collector:8000",
+    "builtin_root": "/app/data",
+    "max_upload_bytes": 67108864
+  },
+  "ml": {
+    "url": "http://ml:8000",
+    "template": "/app/configs/templates/regressors.json",
+    "poll_seconds": 0.5
+  },
+  "master": {
+    "url": "http://master:8000"
+  }
+}

@@ -1,0 +1,82 @@
+x-service: &service
+  environment:
+    UVICORN_HOST: 0.0.0.0
+    UVICORN_PORT: "8000"
+  healthcheck:
+    test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=2).close()"]
+    interval: 2s
+    timeout: 3s
+    retries: 15
+    start_period: 5s
+
+services:
+  storage:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/storage/Dockerfile
+    volumes:
+      - datasets:/workspace/datasets
+      - runs:/workspace/runs
+      - metadata:/workspace/metadata
+    networks: [backend]
+
+  collector:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/collector/Dockerfile
+    depends_on:
+      storage:
+        condition: service_healthy
+    networks: [backend]
+
+  ml:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/ml/Dockerfile
+    depends_on:
+      storage:
+        condition: service_healthy
+    volumes:
+      - datasets:/workspace/datasets:ro
+      - runs:/workspace/runs
+    networks: [backend]
+
+  master:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/master/Dockerfile
+    depends_on:
+      storage:
+        condition: service_healthy
+      collector:
+        condition: service_healthy
+      ml:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${QUALISR_API_PORT:-8080}:8000"
+    networks: [backend, frontend]
+
+  visualization:
+    <<: *service
+    build:
+      context: .
+      dockerfile: services/visualization/Dockerfile
+    depends_on:
+      master:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${QUALISR_UI_PORT:-8501}:8000"
+    networks: [frontend]
+
+networks:
+  backend:
+  frontend:
+
+volumes:
+  datasets:
+  runs:
+  metadata:
